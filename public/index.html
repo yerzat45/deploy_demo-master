@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Counter</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.5.8/dist/css/uikit.min.css" />
+    <style>
+      body {
+        padding: 2rem 0;
+      }
+      #counter {
+        font-weight: bold;
+        padding: 0 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="uk-container">
+      <button id="dec" class="uk-button uk-button-primary" disabled>-</button>
+      <span id="counter">&nbsp;</span>
+      <button id="inc" class="uk-button uk-button-primary" disabled>+</button>
+    </div>
+
+    <script>
+      const wsProto = location.protocol === "https:" ? "wss:" : "ws:";
+      const ws = new WebSocket(`${wsProto}//${location.host}`);
+
+      const updateUi = (count) => (document.getElementById("counter").innerText = count);
+
+      ws.addEventListener("message", (message) => {
+        let data;
+        try {
+          data = JSON.parse(message.data);
+        } catch (err) {
+          return;
+        }
+
+        if (data.type === "ready") {
+          localStorage.setItem("sessionId", data.sessionId);
+          updateUi(data.value);
+          document.getElementById("dec").removeAttribute("disabled");
+          document.getElementById("inc").removeAttribute("disabled");
+        } else if (data.type === "value") {
+          updateUi(data.value);
+        }
+      });
+
+      ws.addEventListener("open", () => {
+        ws.send(
+          JSON.stringify({
+            type: "init",
+            sessionId: localStorage.getItem("sessionId"),
+          })
+        );
+      });
+
+      document.getElementById("dec").addEventListener("click", () => {
+        ws.send(
+          JSON.stringify({
+            type: "dec",
+          })
+        );
+      });
+      document.getElementById("inc").addEventListener("click", () => {
+        ws.send(
+          JSON.stringify({
+            type: "inc",
+          })
+        );
+      });
+    </script>
+  </body>
+</html>
