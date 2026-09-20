@@ -3,9 +3,13 @@
   "extends": ["prettier", "eslint:recommended", "plugin:node/recommended"],
   "env": {
     "node": true,
-    "es6": true
+    "jest/globals": true,
+    "es6": true,
+    "browser": true
   },
-  "plugins": ["prettier"],
-  "rules": {},
+  "plugins": ["prettier", "jest"],
+  "rules": {
+    "no-process-exit": 0
+  },
   "settings": {}
 }
